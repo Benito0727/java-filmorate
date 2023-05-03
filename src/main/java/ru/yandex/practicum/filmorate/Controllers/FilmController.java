@@ -1,10 +1,10 @@
 package ru.yandex.practicum.filmorate.Controllers;
 
 import jakarta.validation.Valid;
-import jakarta.xml.bind.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
