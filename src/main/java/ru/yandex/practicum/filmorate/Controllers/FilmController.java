@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.Controllers;
 
-import jakarta.validation.ValidationException;
+import jakarta.validation.Valid;
+import jakarta.xml.bind.ValidationException;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -12,35 +14,43 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 @RestController
 @Slf4j
 public class FilmController {
-    Map<String, Film> films = new HashMap<>();
+    Map<Integer, Film> films = new HashMap<>();
+    private int filmId = 1;
 
 
     /*
     при соблюдении всех условий добавляет фильм в мапу
      */
     @PostMapping("/films")
-    public Film addFilm(@RequestBody Film film) {
+    public Film addFilm(@Valid @RequestBody @NotNull Film film) {
+        int descLength = film.getDescription().length();
         try {
-            if (film.getName().isBlank() && film.getName().isEmpty()) {
+            if (film.getName().isBlank() || film.getName().isEmpty()) {
                 log.warn("Нет названия фильма");
                 throw new ValidationException("Название не должно быть пустым");
             }
-            if (film.getDescription().length() > 200) {
-                log.warn("Слишком короткое описание фильма");
+            if (descLength > 200) {
+                log.warn("Слишком длинное описание фильма - {} символов", film.getDescription().length());
                 throw new ValidationException("Описание должно быть менее 200 символов");
             }
             if (film.getReleaseDate().isBefore(LocalDate.of(1895, Month.DECEMBER, 28))) {
-                log.warn("Ошибка в дате релиза фильма");
+                log.warn("Ошибка в дате релиза фильма: {}", film.getReleaseDate());
                 throw new ValidationException("Фильм не мог быть снять до 28 декабря 1895 года");
             }
-            if (film.getDuration().isNegative() && film.getDuration().isZero()) {
-                log.warn("у фильма отрицательная или нулевая продолжительность");
+            if (film.getDuration() < 0) {
+                log.warn("у фильма отрицательная или нулевая продолжительность: {}", film.getDuration());
                 throw new ValidationException("Продолжительность фильмы должна быть положительной");
             }
-            films.put(film.getName(), film);
+            if (film.getId() < 1) {
+                film.setId(filmId);
+                filmId++;
+            }
+            films.put(film.getId(), film);
         } catch (ValidationException exception) {
             exception.getCause();
         }
@@ -60,22 +70,33 @@ public class FilmController {
     /*
     обновляет фильм который уже лежал в мапе
      */
-    @PutMapping("/films")
-    public Film updateFilm(@RequestBody Film film) {
+    @PutMapping(value = "/films", produces = APPLICATION_JSON_VALUE)
+    public Film updateFilm(@Valid @RequestBody @NotNull Film film) {
+        int descLength = film.getDescription().length();
         try {
-            if (film.getName().isBlank() && film.getName().isEmpty()) {
+            if (film.getName().isBlank() || film.getName().isEmpty()) {
+                log.warn("Нет названия фильма");
                 throw new ValidationException("Название не должно быть пустым");
             }
-            if (film.getDescription().length() > 200) {
+            if (descLength > 200) {
+                log.warn("Слишком длинное описание фильма - {} символов", film.getDescription().length());
                 throw new ValidationException("Описание должно быть менее 200 символов");
             }
             if (film.getReleaseDate().isBefore(LocalDate.of(1895, Month.DECEMBER, 28))) {
+                log.warn("Ошибка в дате релиза фильма: {}", film.getReleaseDate());
                 throw new ValidationException("Фильм не мог быть снять до 28 декабря 1895 года");
             }
-            if (film.getDuration().isNegative() && film.getDuration().isZero()) {
+            if (film.getDuration() < 0) {
+                log.warn("у фильма отрицательная или нулевая продолжительность: {}", film.getDuration());
                 throw new ValidationException("Продолжительность фильмы должна быть положительной");
             }
-            films.put(film.getName(), film);
+            if (films.containsKey(film.getId())) {
+                films.put(film.getId(), film);
+                log.info("Фильм с ID: {} успешно обновлен", film.getId());
+            } else {
+                log.warn("Попытка обновления несуществующего ID");
+                throw new ValidationException("Несуществующий ID");
+            }
         } catch (ValidationException exception) {
             exception.getCause();
         }

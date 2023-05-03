@@ -1,6 +1,9 @@
 package ru.yandex.practicum.filmorate.Controllers;
 
+import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
+import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -11,10 +14,11 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@Slf4j
 public class UserController {
 
-    Map<String, User> users = new HashMap<>();
-    private int userId = 0;
+    Map<Integer, User> users = new HashMap<>();
+    private int userId = 1;
     /*
     отдает список пользователей
      */
@@ -29,23 +33,28 @@ public class UserController {
     добавляет нового пользователя
      */
     @PostMapping("/users")
-    public User addUser(@RequestBody User user) {
+    public User addUser(@Valid @RequestBody @NotNull User user) {
         try {
+            if (user.getEmail() == null || !user.getEmail().contains("@")) {
+                log.warn("Некорректный email: {}", user.getEmail());
+                throw new ValidationException("Некорректный email");
+            }
+            if (user.getLogin() == null || user.getLogin().contains(" ")) {
+                log.warn("Некорректный login: {}", user.getLogin());
+                throw new ValidationException("Некорректный login");
+            }
+            if (user.getName() == null) user.setName(user.getLogin());
+            if (user.getBirthday().isAfter(LocalDate.now())) {
+                log.warn("Некорректная дата рождения: {}", user.getBirthday());
+                throw new ValidationException("День рождения не может быть в будущем");
+            }
             if (user.getId() < 1) {
                 user.setId(userId);
                 userId++;
+
             }
-            if (user.getEmail() == null && !user.getEmail().contains("@")) {
-                throw new ValidationException("Некорректный email");
-            }
-            if (user.getLogin() == null && user.getLogin().contains(" ")) {
-                throw new ValidationException("Некорректный login");
-            }
-            if (user.getName().isEmpty() && user.getName() == null) user.setName(user.getLogin());
-            if (user.getBirthday().isAfter(LocalDate.now())) {
-                throw new ValidationException("День рождения не может быть в будущем");
-            }
-            users.put(user.getEmail(), user);
+            users.put(user.getId(), user);
+            log.info("Пользователь с ID: {} успешно создан", user.getId());
         } catch (ValidationException exception) {
             exception.getCause();
         }
@@ -57,23 +66,35 @@ public class UserController {
     обновляет уже существующего пользователя
      */
     @PutMapping("/users")
-    public User updateUser(@RequestBody User user) {
+    public User updateUser(@Valid @RequestBody @NotNull User user) {
         try {
-            if (user.getEmail().isEmpty() && !user.getEmail().contains("@")) {
-                throw new ValidationException("Некорректный email");
+            if (user.getEmail().isEmpty() || !user.getEmail().contains("@")) {
+                log.warn("Некорректный email: {}", user.getEmail());
+                throw new jakarta.validation.ValidationException("Некорректный email");
             }
-            if (user.getLogin().isEmpty() && user.getLogin().contains(" ")) {
+            if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
+                log.warn("Некорректный login: {}", user.getLogin());
                 throw new ValidationException("Некорректный login");
             }
-            if (user.getName().isEmpty() && user.getName() == null) user.setName(user.getLogin());
+            if (user.getName() == null) user.setName(user.getLogin());
             if (user.getBirthday().isAfter(LocalDate.now())) {
+                log.warn("Некорректная дата рождения: {}", user.getBirthday());
                 throw new ValidationException("День рождения не может быть в будущем");
             }
-            users.put(user.getEmail(), user);
+            if (users.containsKey(user.getId())) {
+                log.info("Пользователь с ID: {} успешно обновлен", user.getId());
+                users.put(user.getId(), user);
+            } else {
+                log.warn("Попытка обновления несуществующего ID");
+                throw new ValidationException("Несуществующий ID");
+            }
         } catch (ValidationException exception) {
             exception.getCause();
         }
         return user;
     }
+
+
+
 
 }
