@@ -56,7 +56,7 @@ public class UserController {
             users.put(user.getId(), user);
             log.info("Пользователь с ID: {} успешно создан", user.getId());
         } catch (ValidationException exception) {
-            exception.getCause();
+            throw new RuntimeException(exception.getMessage());
         }
         return user;
     }
@@ -89,12 +89,8 @@ public class UserController {
                 throw new ValidationException("Несуществующий ID");
             }
         } catch (ValidationException exception) {
-            exception.getCause();
+            throw new RuntimeException(exception.getMessage());
         }
         return user;
     }
-
-
-
-
 }

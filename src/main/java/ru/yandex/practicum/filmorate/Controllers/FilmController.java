@@ -52,7 +52,7 @@ public class FilmController {
             }
             films.put(film.getId(), film);
         } catch (ValidationException exception) {
-            exception.getCause();
+            throw new RuntimeException(exception.getMessage());
         }
         return film;
     }
@@ -98,7 +98,7 @@ public class FilmController {
                 throw new ValidationException("Несуществующий ID");
             }
         } catch (ValidationException exception) {
-            exception.getCause();
+            throw new RuntimeException(exception.getMessage());
         }
         return film;
     }
