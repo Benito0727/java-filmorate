@@ -18,20 +18,23 @@ import java.util.Map;
 public class UserController {
 
     Map<Integer, User> users = new HashMap<>();
+
     private int userId = 1;
+
     /*
     отдает список пользователей
      */
+
     @GetMapping("/users")
-    public List<User> getUsersList(){
+    public List<User> getUsersList() {
         return new ArrayList<>(users.values());
     }
-
 
     /*
     при соблюдении условий
     добавляет нового пользователя
      */
+
     @PostMapping("/users")
     public User addUser(@Valid @RequestBody @NotNull User user) {
         try {
@@ -51,7 +54,6 @@ public class UserController {
             if (user.getId() < 1) {
                 user.setId(userId);
                 userId++;
-
             }
             users.put(user.getId(), user);
             log.info("Пользователь с ID: {} успешно создан", user.getId());
@@ -65,6 +67,7 @@ public class UserController {
     при соблюдении условий
     обновляет уже существующего пользователя
      */
+
     @PutMapping("/users")
     public User updateUser(@Valid @RequestBody @NotNull User user) {
         try {
