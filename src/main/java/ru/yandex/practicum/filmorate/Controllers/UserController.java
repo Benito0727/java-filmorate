@@ -19,19 +19,21 @@ public class UserController {
 
     Map<Integer, User> users = new HashMap<>();
     private int userId = 1;
+
     /*
     отдает список пользователей
      */
+
     @GetMapping("/users")
-    public List<User> getUsersList(){
+    public List<User> getUsersList() {
         return new ArrayList<>(users.values());
     }
-
 
     /*
     при соблюдении условий
     добавляет нового пользователя
      */
+
     @PostMapping("/users")
     public User addUser(@Valid @RequestBody @NotNull User user) {
         try {
