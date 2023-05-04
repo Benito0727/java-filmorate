@@ -18,6 +18,7 @@ import java.util.Map;
 public class UserController {
 
     Map<Integer, User> users = new HashMap<>();
+
     private int userId = 1;
 
     /*
@@ -67,6 +68,7 @@ public class UserController {
     при соблюдении условий
     обновляет уже существующего пользователя
      */
+
     @PutMapping("/users")
     public User updateUser(@Valid @RequestBody @NotNull User user) {
         try {

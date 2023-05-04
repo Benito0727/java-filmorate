@@ -19,13 +19,16 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RestController
 @Slf4j
 public class FilmController {
+
     Map<Integer, Film> films = new HashMap<>();
+
     private int filmId = 1;
 
 
     /*
     при соблюдении всех условий добавляет фильм в мапу
      */
+
     @PostMapping("/films")
     public Film addFilm(@Valid @RequestBody @NotNull Film film) {
         int descLength = film.getDescription().length();
@@ -61,6 +64,7 @@ public class FilmController {
     /*
     отдает список всех фильмов, что сейчас есть в хранилище
     */
+
     @GetMapping("/films")
     public List<Film> getFilms() {
         return new ArrayList<>(films.values());
@@ -70,6 +74,7 @@ public class FilmController {
     /*
     обновляет фильм который уже лежал в мапе
      */
+
     @PutMapping(value = "/films", produces = APPLICATION_JSON_VALUE)
     public Film updateFilm(@Valid @RequestBody @NotNull Film film) {
         int descLength = film.getDescription().length();
