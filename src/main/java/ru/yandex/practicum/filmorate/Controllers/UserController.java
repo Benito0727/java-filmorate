@@ -38,11 +38,11 @@ public class UserController {
     @PostMapping("/users")
     public User addUser(@Valid @RequestBody @NotNull User user) {
         try {
-            if (user.getEmail() == null || !user.getEmail().contains("@")) {
+            if (isIncorrectEmail(user.getEmail())) {
                 log.warn("Некорректный email: {}", user.getEmail());
                 throw new ValidationException("Некорректный email");
             }
-            if (user.getLogin() == null || user.getLogin().contains(" ")) {
+            if (isIncorrectLogin(user.getLogin())) {
                 log.warn("Некорректный login: {}", user.getLogin());
                 throw new ValidationException("Некорректный login");
             }
@@ -71,11 +71,11 @@ public class UserController {
     @PutMapping("/users")
     public User updateUser(@Valid @RequestBody @NotNull User user) {
         try {
-            if (user.getEmail().isEmpty() || !user.getEmail().contains("@")) {
+            if (isIncorrectEmail(user.getEmail())) {
                 log.warn("Некорректный email: {}", user.getEmail());
                 throw new ValidationException("Некорректный email");
             }
-            if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
+            if (isIncorrectLogin(user.getLogin())) {
                 log.warn("Некорректный login: {}", user.getLogin());
                 throw new ValidationException("Некорректный login");
             }
@@ -95,5 +95,13 @@ public class UserController {
             throw new RuntimeException(exception.getMessage());
         }
         return user;
+    }
+
+    private boolean isIncorrectLogin(String login) {
+        return login.isEmpty() || login.contains(" ");
+    }
+
+    private boolean isIncorrectEmail(String email) {
+        return email.isEmpty() || !email.contains("@");
     }
 }

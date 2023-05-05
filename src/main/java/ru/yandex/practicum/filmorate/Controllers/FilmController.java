@@ -31,7 +31,7 @@ public class FilmController {
     public Film addFilm(@Valid @RequestBody @NotNull Film film) {
         int descLength = film.getDescription().length();
         try {
-            if (film.getName().isBlank() || film.getName().isEmpty()) {
+            if (isIncorrectName(film.getName())) {
                 log.warn("Нет названия фильма");
                 throw new ValidationException("Название не должно быть пустым");
             }
@@ -43,7 +43,7 @@ public class FilmController {
                 log.warn("Ошибка в дате релиза фильма: {}", film.getReleaseDate());
                 throw new ValidationException("Фильм не мог быть снять до 28 декабря 1895 года");
             }
-            if (film.getDuration() < 0) {
+            if (film.getDuration() <= 0) {
                 log.warn("у фильма отрицательная или нулевая продолжительность: {}", film.getDuration());
                 throw new ValidationException("Продолжительность фильмы должна быть положительной");
             }
@@ -76,7 +76,7 @@ public class FilmController {
     public Film updateFilm(@Valid @RequestBody @NotNull Film film) {
         int descLength = film.getDescription().length();
         try {
-            if (film.getName().isBlank() || film.getName().isEmpty()) {
+            if (isIncorrectName(film.getName())) {
                 log.warn("Нет названия фильма");
                 throw new ValidationException("Название не должно быть пустым");
             }
@@ -88,7 +88,7 @@ public class FilmController {
                 log.warn("Ошибка в дате релиза фильма: {}", film.getReleaseDate());
                 throw new ValidationException("Фильм не мог быть снять до 28 декабря 1895 года");
             }
-            if (film.getDuration() < 0) {
+            if (film.getDuration() <= 0) {
                 log.warn("у фильма отрицательная или нулевая продолжительность: {}", film.getDuration());
                 throw new ValidationException("Продолжительность фильмы должна быть положительной");
             }
@@ -103,5 +103,9 @@ public class FilmController {
             throw new RuntimeException(exception.getMessage());
         }
         return film;
+    }
+
+    private boolean isIncorrectName(String name) {
+        return name.isBlank() || name.isEmpty();
     }
 }
