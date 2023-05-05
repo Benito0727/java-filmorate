@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.Controllers;
 
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -73,7 +73,7 @@ public class UserController {
         try {
             if (user.getEmail().isEmpty() || !user.getEmail().contains("@")) {
                 log.warn("Некорректный email: {}", user.getEmail());
-                throw new jakarta.validation.ValidationException("Некорректный email");
+                throw new ValidationException("Некорректный email");
             }
             if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
                 log.warn("Некорректный login: {}", user.getLogin());
