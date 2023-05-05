@@ -4,16 +4,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserControllerTest {
 
     private UserController controller;
 
-    private final static TestUnits unit = new TestUnits();
+    private static final TestUnits unit = new TestUnits();
 
     @BeforeEach
     public void setup() {
