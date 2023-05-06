@@ -37,28 +37,14 @@ public class UserController {
 
     @PostMapping("/users")
     public User addUser(@Valid @RequestBody @NotNull User user) {
-        try {
-            if (isIncorrectEmail(user.getEmail())) {
-                log.warn("Некорректный email: {}", user.getEmail());
-                throw new ValidationException("Некорректный email");
-            }
-            if (isIncorrectLogin(user.getLogin())) {
-                log.warn("Некорректный login: {}", user.getLogin());
-                throw new ValidationException("Некорректный login");
-            }
+        if (isValid(user)) {
             if (user.getName() == null) user.setName(user.getLogin());
-            if (user.getBirthday().isAfter(LocalDate.now())) {
-                log.warn("Некорректная дата рождения: {}", user.getBirthday());
-                throw new ValidationException("День рождения не может быть в будущем");
-            }
             if (user.getId() < 1) {
                 user.setId(userId);
                 userId++;
             }
             users.put(user.getId(), user);
             log.info("Пользователь с ID: {} успешно создан", user.getId());
-        } catch (ValidationException exception) {
-            throw new RuntimeException(exception.getMessage());
         }
         return user;
     }
@@ -71,6 +57,25 @@ public class UserController {
     @PutMapping("/users")
     public User updateUser(@Valid @RequestBody @NotNull User user) {
         try {
+            if (isValid(user)) {
+                if (user.getName() == null) user.setName(user.getLogin());
+                if (users.containsKey(user.getId())) {
+                    log.info("Пользователь с ID: {} успешно обновлен", user.getId());
+                    users.put(user.getId(), user);
+                } else {
+                    log.warn("Попытка обновления несуществующего ID");
+                    throw new ValidationException("Несуществующий ID");
+                }
+            }
+        } catch (ValidationException exception) {
+            throw new RuntimeException(exception.getMessage());
+        }
+        return user;
+    }
+
+    private boolean isValid(User user) {
+        boolean valid;
+        try {
             if (isIncorrectEmail(user.getEmail())) {
                 log.warn("Некорректный email: {}", user.getEmail());
                 throw new ValidationException("Некорректный email");
@@ -79,22 +84,15 @@ public class UserController {
                 log.warn("Некорректный login: {}", user.getLogin());
                 throw new ValidationException("Некорректный login");
             }
-            if (user.getName() == null) user.setName(user.getLogin());
             if (user.getBirthday().isAfter(LocalDate.now())) {
                 log.warn("Некорректная дата рождения: {}", user.getBirthday());
                 throw new ValidationException("День рождения не может быть в будущем");
             }
-            if (users.containsKey(user.getId())) {
-                log.info("Пользователь с ID: {} успешно обновлен", user.getId());
-                users.put(user.getId(), user);
-            } else {
-                log.warn("Попытка обновления несуществующего ID");
-                throw new ValidationException("Несуществующий ID");
-            }
+            valid = true;
         } catch (ValidationException exception) {
             throw new RuntimeException(exception.getMessage());
         }
-        return user;
+        return valid;
     }
 
     private boolean isIncorrectLogin(String login) {
@@ -102,6 +100,6 @@ public class UserController {
     }
 
     private boolean isIncorrectEmail(String email) {
-        return email.isEmpty() || !email.contains("@");
+        return !email.contains("@");
     }
 }
