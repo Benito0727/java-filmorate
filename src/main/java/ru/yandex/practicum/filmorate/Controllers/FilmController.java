@@ -32,9 +32,7 @@ public class FilmController {
 
     @PostMapping("/films")
     public Film addFilm(@Valid @RequestBody @NotNull Film film) {
-        if (isValid(film)) {
-            filmService.addFilm(film);
-        }
+        if (isValid(film)) return filmService.addFilm(film);
         return film;
     }
 
@@ -57,9 +55,13 @@ public class FilmController {
 
     @PutMapping(value = "/films", produces = APPLICATION_JSON_VALUE)
     public Film updateFilm(@Valid @RequestBody @NotNull Film film) {
-        if (isValid(film)) filmService.updateFilm(film);
+        if (isValid(film)) return filmService.updateFilm(film);
         return film;
     }
+
+    /*
+        пользователь userId ставит лайк фильму filmId
+     */
 
     @PutMapping("/films/{id}/like/{userId}")
     public Film setLike(@PathVariable(value = "id") int filmId,
@@ -67,12 +69,19 @@ public class FilmController {
         return filmService.addLike(userId, filmId);
     }
 
+    /*
+    пользователь userId убирает лайк у фильма filmId
+     */
+
     @DeleteMapping("/films/{id}/like/{userId}")
     public Film removeLike(@PathVariable(value = "id") int filmId,
                            @PathVariable(value = "userId") int userId) {
         return filmService.removeLike(userId, filmId);
     }
 
+    /*
+    получить самые залайканые фильмы в количестве count, либо первая десятка
+     */
     @GetMapping("/films/popular")
     public List<Film> getMostPopularFilm(@RequestParam(defaultValue = "10") int count) {
         return filmService.getMostPopularFilm(count);
