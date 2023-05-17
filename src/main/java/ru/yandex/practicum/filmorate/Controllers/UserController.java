@@ -58,6 +58,43 @@ public class UserController {
         return user;
     }
 
+    /*
+    Добавить пользователю с id в друзья пользователя с friendId
+     */
+    @PutMapping("/users/{id}/friends/{friendId}")
+    public User addFriend(@PathVariable(value = "id") int id,
+                          @PathVariable(value = "friendId")  int friendId) {
+        userService.addFriend(id, friendId);
+        return userService.getUser(friendId);
+    }
+
+    /*
+    Удалить из друзей пользователя id, пользователя friendId
+     */
+    @DeleteMapping("/users/{id}/friends/{friendId}")
+    public User removeFriend(@PathVariable(value = "id") int id,
+                             @PathVariable(value = "friendId") int friendId) {
+        userService.removeFriend(id, friendId);
+        return userService.getUser(friendId);
+    }
+
+    /*
+    получить список друзей пользователя
+     */
+    @GetMapping("/users/{id}/friends")
+    public List<User> getFriendsList(@PathVariable int id) {
+        return userService.getFriendList(userService.getUser(id));
+    }
+
+    /*
+    получить список общих друзей пользователя id с friendId
+     */
+    @GetMapping("/users/{id}/friends/common/{friendId}")
+    public List<User> getMutualFriends(@PathVariable(value = "id") int id,
+                                       @PathVariable(value = "friendId") int friendId) {
+        return userService.getMutualFriends(userService.getUser(id), userService.getUser(friendId));
+    }
+
     private boolean isValid(@org.jetbrains.annotations.NotNull User user) {
         boolean valid;
         try {

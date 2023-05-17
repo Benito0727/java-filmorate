@@ -3,20 +3,21 @@ package ru.yandex.practicum.filmorate.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
-import java.util.List;
+import java.util.*;
 
 @Service
 public class FilmService {
 
-    private final FilmStorage filmStorage;
+    private final InMemoryFilmStorage filmStorage;
+    private final InMemoryUserStorage userStorage;
 
     @Autowired
-    public FilmService(InMemoryFilmStorage filmStorage) {
+    public FilmService(InMemoryFilmStorage filmStorage, InMemoryUserStorage userStorage) {
         this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
     }
 
     public Film addFilm(Film film) {
@@ -39,15 +40,17 @@ public class FilmService {
         return filmStorage.getFilmsList();
     }
 
-    public Film addLike(User user) {  // поставить лайк
-        return null;
+    public Film addLike(int userId, int filmId) {  // поставить лайк
+        filmStorage.getFilm(filmId).setLikes(userStorage.getUser(userId));
+        return filmStorage.getFilm(filmId);
     }
 
-    public Film removeLike(User user) {     // убрать лайк
-        return null;
+    public Film removeLike(int userId, int filmId) {     // убрать лайк
+        filmStorage.getFilm(filmId).removeLike(userStorage.getUser(userId));
+        return filmStorage.getFilm(filmId);
     }
 
     public List<Film> getMostPopularFilm(int count) {       //получить список самых популярных фильмов
-        return null;
+        return filmStorage.getMostPopularFilms(count);
     }
 }

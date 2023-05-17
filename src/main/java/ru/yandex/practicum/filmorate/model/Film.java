@@ -25,4 +25,11 @@ public class Film {
 
     private Set<User> likes = new HashSet<>(); // лайки фильма
 
+    public void setLikes(User user) {
+        likes.add(user);
+    }
+
+    public void removeLike(User user) {
+        likes.remove(user);
+    }
 }

@@ -34,13 +34,13 @@ public class UserService {
         return userStorage.getUserList();
     }
 
-    public User addFriend(User user, int friendId) {
-        user.addFriends(userStorage.getUser(friendId));
+    public User addFriend(int id, int friendId) {
+        userStorage.getUser(id).addFriends(userStorage.getUser(friendId));
         return userStorage.getUser(friendId);
     }
 
-    public User removeFriend(User user, int friendId) {
-        user.removeFriends(userStorage.getUser(friendId));
+    public User removeFriend(int id, int friendId) {
+        userStorage.getUser(id).removeFriends(userStorage.getUser(friendId));
         return userStorage.getUser(friendId);
     }
 
