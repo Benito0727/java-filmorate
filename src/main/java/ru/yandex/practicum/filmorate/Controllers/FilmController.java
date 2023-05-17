@@ -1,18 +1,17 @@
 package ru.yandex.practicum.filmorate.Controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.services.FilmService;
+import org.jetbrains.annotations.NotNull;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -20,21 +19,21 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Slf4j
 public class FilmController {
 
-    Map<Integer, Film> films = new HashMap<>();
-    private int filmId = 1;
+    private final FilmService filmService;
+
+    @Autowired
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     /*
-    при соблюдении всех условий добавляет фильм в мапу
+    добавляет фильм в хранилище
      */
 
     @PostMapping("/films")
     public Film addFilm(@Valid @RequestBody @NotNull Film film) {
         if (isValid(film)) {
-            if (film.getId() < 1) {
-                film.setId(filmId);
-                filmId++;
-            }
-            films.put(film.getId(), film);
+            filmService.addFilm(film);
         }
         return film;
     }
@@ -45,32 +44,24 @@ public class FilmController {
 
     @GetMapping("/films")
     public List<Film> getFilms() {
-        return new ArrayList<>(films.values());
+        try {
+            return filmService.getFilmsList();
+        } catch (NullPointerException exception) {
+            throw new RuntimeException();
+        }
     }
 
     /*
-    обновляет фильм который уже лежал в мапе
+    обновляет фильм который уже лежал в хранилище
      */
 
     @PutMapping(value = "/films", produces = APPLICATION_JSON_VALUE)
     public Film updateFilm(@Valid @RequestBody @NotNull Film film) {
-        try {
-            if (isValid(film)) {
-                if (films.containsKey(film.getId())) {
-                    films.put(film.getId(), film);
-                    log.info("Фильм с ID: {} успешно обновлен", film.getId());
-                } else {
-                    log.warn("Попытка обновления несуществующего ID");
-                    throw new ValidationException("Несуществующий ID");
-                }
-            }
-        } catch (ValidationException exception) {
-            throw new RuntimeException(exception.getMessage());
-        }
+        if (isValid(film)) filmService.updateFilm(film);
         return film;
     }
 
-    private boolean isValid(Film film) {
+    private boolean isValid(@NotNull Film film) {
         boolean valid;
         int descLength = film.getDescription().length();
         try {
@@ -97,7 +88,7 @@ public class FilmController {
         return valid;
     }
 
-    private boolean isIncorrectName(String name) {
+    private boolean isIncorrectName(@NotNull String name) {
         return name.isBlank() || name.isEmpty();
     }
 }

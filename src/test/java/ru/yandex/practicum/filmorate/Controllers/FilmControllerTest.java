@@ -4,6 +4,8 @@ package ru.yandex.practicum.filmorate.Controllers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.services.FilmService;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.util.ArrayList;
 
@@ -13,11 +15,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class FilmControllerTest {
 
     private FilmController controller;
+
+    private FilmService filmService;
     private static final TestUnits unit = new TestUnits();
 
     @BeforeEach
     public void setup() {
-        controller = new FilmController();
+        filmService = new FilmService(new InMemoryFilmStorage());
+        controller = new FilmController(filmService);
     }
 
     @Test
@@ -25,7 +30,7 @@ class FilmControllerTest {
         Film film = unit.getFilm();
         controller.addFilm(film);
 
-       assertEquals(film, controller.films.get(1));
+       assertEquals(film, filmService.getFilm(1));
     }
 
     @Test
