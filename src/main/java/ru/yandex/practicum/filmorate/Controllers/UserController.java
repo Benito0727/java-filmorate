@@ -46,6 +46,14 @@ public class UserController {
     }
 
     /*
+    отдает пользователя по id
+     */
+    @GetMapping("/users/{id}")
+    public User getUserById(@PathVariable int id) {
+        return userService.getUser(id);
+    }
+
+    /*
     при соблюдении условий
     обновляет уже существующего пользователя
      */
@@ -75,7 +83,7 @@ public class UserController {
     public User removeFriend(@PathVariable(value = "id") int id,
                              @PathVariable(value = "friendId") int friendId) {
         userService.removeFriend(id, friendId);
-        return userService.getUser(friendId);
+        return userService.getUser(id);
     }
 
     /*

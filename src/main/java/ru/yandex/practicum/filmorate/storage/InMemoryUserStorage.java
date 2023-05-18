@@ -1,8 +1,9 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
@@ -19,8 +20,8 @@ public class InMemoryUserStorage implements UserStorage {
     private int userId = 1;
 
     @Override
-    public User addUser(User user) {
-        setUserName(user);
+    public User addUser(@NotNull User user) {
+        if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
         if (user.getId() < 1) {
             user.setId(userId);
             userId++;
@@ -31,39 +32,48 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User removeUser(User user) {
+    public User removeUser(@NotNull User user) {
+        if (users.get(user.getId()) == null) {
+            throw new NotFoundException(String.format("Пользователь с id %d", user.getId()));
+        }
         users.remove(user.getId());
         return user;
     }
 
     @Override
-    public User updateUser(User user) {
+    public User updateUser(@NotNull User user) {
         try {
-            setUserName(user);
+            if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
             if (users.containsKey(user.getId())) {
                 log.info("Пользователь с ID: {} успешно обновлен", user.getId());
                 users.put(user.getId(), user);
             } else {
                 log.warn("Попытка обновления несуществующего ID");
-                throw new ValidationException("Несуществующий ID");
+                throw new NotFoundException("Несуществующий ID");
             }
-        } catch (ValidationException exception) {
-            throw new RuntimeException(exception.getMessage());
+        } catch (NotFoundException exception) {
+            throw new NotFoundException(exception.getMessage());
         }
         return user;
     }
 
     @Override
     public List<User> getUserList() {
-        return new ArrayList<>(users.values());
+        if (!users.isEmpty()) {
+            return new ArrayList<>(users.values());
+        } else {
+            log.warn("Запрос пустого списка пользователей");
+            throw new NotFoundException("Список пользователей пуст");
+        }
     }
 
     @Override
     public User getUser(int id) {
-        return users.get(id);
-    }
-
-    private void setUserName(User user) {
-        if (user.getName() == null) user.setName(user.getLogin());
+        if (users.get(id) != null) {
+            return users.get(id);
+        } else {
+            log.warn(String.format("Пользователь с id %d не найден", id));
+            throw new NotFoundException(String.format("Пользователь с id %d не найден", id));
+        }
     }
 }

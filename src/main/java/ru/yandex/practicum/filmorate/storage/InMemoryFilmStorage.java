@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
@@ -30,15 +30,16 @@ public class InMemoryFilmStorage implements FilmStorage {
             filmId++;
         }
         films.put(film.getId(), film);
+        log.info(String.format("Фильм с id %d успешно добавлен", film.getId()));
         return film;
     }
 
     @Override
     public Film getFilm(int id) {  // получить фильм по ид
-        if (!films.isEmpty()) {
+        if (films.get(id) != null) {
             return films.get(id);
         } else {
-            return null;
+            throw new NotFoundException(String.format("фильм с id %d не найден", id));
         }
     }
 
@@ -56,11 +57,11 @@ public class InMemoryFilmStorage implements FilmStorage {
                 log.info("Фильм с ID: {} успешно обновлен", film.getId());
             } else {
                 log.warn("Попытка обновления несуществующего ID");
-                throw new ValidationException("Несуществующий ID");
+                throw new NotFoundException(String.format("Фильма с таким id: %d не существует", film.getId()));
             }
             films.put(film.getId(), film);
-        } catch (ValidationException exception) {
-            exception.getCause();
+        } catch (NotFoundException exception) {
+            throw new NotFoundException(exception.getMessage());
         }
         return film;
     }

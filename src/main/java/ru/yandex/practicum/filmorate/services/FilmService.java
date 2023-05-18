@@ -20,19 +20,19 @@ public class FilmService {
         this.userStorage = userStorage;
     }
 
-    public Film addFilm(Film film) {
+    public Film addFilm(Film film) {   // добавить фильм
         return filmStorage.addFilm(film);
     }
 
-    public Film removeFilm(Film film) {
+    public Film removeFilm(Film film) {  // удалить фильм
         return filmStorage.removeFilm(film);
     }
 
-    public Film updateFilm(Film film) {
+    public Film updateFilm(Film film) {  // обновить фильм
         return filmStorage.updateFilm(film);
     }
 
-    public Film getFilm(int id) {
+    public Film getFilm(int id) {  // получить фильм по id
         return filmStorage.getFilm(id);
     }
 

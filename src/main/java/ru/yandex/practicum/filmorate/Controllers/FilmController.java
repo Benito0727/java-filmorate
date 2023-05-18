@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.Controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.services.FilmService;
@@ -44,9 +45,18 @@ public class FilmController {
     public List<Film> getFilms() {
         try {
             return filmService.getFilmsList();
-        } catch (NullPointerException exception) {
-            throw new RuntimeException();
+        } catch (NotFoundException exception) {
+            throw new NotFoundException(exception.getMessage());
         }
+    }
+
+    /*
+    отдает фильм по id
+     */
+
+    @GetMapping("/films/{id}")
+    public Film getFilmById(@PathVariable int id) {
+        return filmService.getFilm(id);
     }
 
     /*
@@ -109,7 +119,7 @@ public class FilmController {
             }
             valid = true;
         } catch (ValidationException exception) {
-            throw new RuntimeException(exception.getMessage());
+            throw new ValidationException(exception.getMessage());
         }
         return valid;
     }
