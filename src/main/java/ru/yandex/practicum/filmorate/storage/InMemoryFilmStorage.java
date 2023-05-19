@@ -14,7 +14,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Integer, Film> films = new HashMap<>();
 
-    private final Set<Film> mostPopularFilms;
+    private final TreeSet<Film> mostPopularFilms;
 
     private int filmId = 1;
 
@@ -39,12 +39,16 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (films.get(id) != null) {
             return films.get(id);
         } else {
+            log.warn(String.format("Фильм с id %d не найден", id));
             throw new NotFoundException(String.format("фильм с id %d не найден", id));
         }
     }
 
     @Override
     public Film removeFilm(@NotNull Film film) {  // удалить фильм
+        if (!films.containsValue(film)) {
+            throw new NotFoundException(String.format("Фильм с id %d не найден", film.getId()));
+        }
         films.remove(film.getId());
         return film;
     }
@@ -56,7 +60,7 @@ public class InMemoryFilmStorage implements FilmStorage {
                 films.put(film.getId(), film);
                 log.info("Фильм с ID: {} успешно обновлен", film.getId());
             } else {
-                log.warn("Попытка обновления несуществующего ID");
+                log.warn(String.format("Попытка обновления несуществующего id - %d", film.getId()));
                 throw new NotFoundException(String.format("Фильма с таким id: %d не существует", film.getId()));
             }
             films.put(film.getId(), film);
@@ -71,10 +75,9 @@ public class InMemoryFilmStorage implements FilmStorage {
         return new ArrayList<>(films.values());
     }
 
-    public List<Film> getMostPopularFilms(int count) {
+    public Set<Film> getMostPopularFilms() {
         mostPopularFilms.addAll(films.values());
-        ArrayList<Film> mostPopularByCount = new ArrayList<>();
-        mostPopularFilms.stream().limit(count).forEach(mostPopularByCount::add);
-        return mostPopularByCount;
+        NavigableSet<Film> filmByCount = mostPopularFilms.descendingSet();
+        return filmByCount;
     }
 }

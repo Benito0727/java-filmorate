@@ -13,6 +13,7 @@ import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
+import java.util.Set;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -93,7 +94,7 @@ public class FilmController {
     получить самые залайканые фильмы в количестве count, либо первая десятка
      */
     @GetMapping("/films/popular")
-    public List<Film> getMostPopularFilm(@RequestParam(defaultValue = "10") int count) {
+    public Set<Film> getMostPopularFilm(@RequestParam(defaultValue = "10") int count) {
         return filmService.getMostPopularFilm(count);
     }
 

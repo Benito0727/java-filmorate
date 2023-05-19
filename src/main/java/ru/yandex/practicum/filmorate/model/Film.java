@@ -23,13 +23,14 @@ public class Film {
     @Positive
     private int duration;          // продолжительность фильма
 
-    private Set<User> likes = new HashSet<>(); // лайки фильма
+    private Set<Integer> likes = new HashSet<>(); // лайки фильма
 
-    public void setLikes(User user) {
-        likes.add(user);
+    public void setLikes(int userId) {
+        likes.add(userId);
+
     }
 
-    public void removeLike(User user) {
-        likes.remove(user);
+    public void removeLike(int userId) {
+        likes.remove(userId);
     }
 }
