@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.services.UserService;
 import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @Slf4j
@@ -90,8 +91,8 @@ public class UserController {
     получить список друзей пользователя
      */
     @GetMapping("/users/{id}/friends")
-    public List<User> getFriendsList(@PathVariable int id) {
-        return userService.getFriendList(userService.getUser(id));
+    public Set<User> getFriendsList(@PathVariable int id) {
+        return userService.getFriendList(id);
     }
 
     /*

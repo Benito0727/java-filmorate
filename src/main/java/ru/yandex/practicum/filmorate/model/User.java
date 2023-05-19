@@ -26,14 +26,14 @@ public class User {
     @PastOrPresent
     private LocalDate birthday;     // день рождения пользователя
 
-    private Set<User> friends = new HashSet<>();
+    private Set<Integer> friends = new HashSet<>();
 
-    public void removeFriends(User user) {
-        friends.remove(user);
+    public void removeFriends(int id) {
+        friends.remove(id);
     }
 
-    public void addFriends(User user) {
-        friends.add(user);
+    public void addFriends(int id) {
+        friends.add(id);
     }
 
 }

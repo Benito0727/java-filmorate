@@ -10,7 +10,9 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -50,7 +52,7 @@ public class UserService {
     public User addFriend(int id, int friendId) {
         try {
             if (isUserInStorage(id) && isUserInStorage(friendId)) {
-                userStorage.getUser(id).addFriends(userStorage.getUser(friendId));
+                userStorage.getUser(id).addFriends(friendId);
             }
             return userStorage.getUser(id);
         } catch (ValidationException exception) {
@@ -63,16 +65,9 @@ public class UserService {
     public User removeFriend(int id, int friendId) {
         try {
             if (isUserInStorage(id) && isUserInStorage(friendId)) {
-                User user = userStorage.getUser(id);
-                User friend = userStorage.getUser(friendId);
-                if (user.getFriends().contains(friend)) {
-                    log.info("Пользователь " + friendId + " удален из друзей пользователя " + id);
-                    user.removeFriends(friend);
-                    return userStorage.getUser(id);
-                } else {
-                    throw new NotFoundException("Пользователя с id " + friendId +
-                            " нет в списке друзей пользователя с id " + id);
-                }
+                log.info("Пользователь " + friendId + " удален из друзей пользователя " + id);
+                userStorage.getUser(id).removeFriends(friendId);
+                return userStorage.getUser(id);
             }
             throw new RuntimeException("Ошибка удаления из друзей");
         } catch (ValidationException exception) {
@@ -84,16 +79,20 @@ public class UserService {
 
     public List<User> getMutualFriends(@NotNull User user, User otherUser) {
         ArrayList<User> mutualFriends = new ArrayList<>();
-        for (User friend : user.getFriends()) {
+        for (Integer friend : user.getFriends()) {
             if (otherUser.getFriends().contains(friend)) {
-                mutualFriends.add(friend);
+                mutualFriends.add(userStorage.getUser(friend));
             }
         }
         return mutualFriends;
     }
 
-    public List<User> getFriendList(@NotNull User user) {
-        return new ArrayList<>(user.getFriends());
+    public Set<User> getFriendList(int id) {
+        Set<User> friendSet = new HashSet<>();
+        for (Integer friend : userStorage.getUser(id).getFriends()) {
+            friendSet.add(userStorage.getUser(friend));
+        }
+        return friendSet;
     }
 
     private boolean isUserInStorage(int id) {

@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.services.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -97,7 +98,7 @@ class UserControllerTest {
         controller.addUser(user2);
         controller.addFriend(1, 2);
 
-        assertTrue(user1.getFriends().contains(user2));
+        assertTrue(user1.getFriends().contains(2));
         assertThrows(NotFoundException.class, () -> controller.addFriend(1, 9999));
         assertThrows(NotFoundException.class, () -> controller.addFriend(2, -1));
     }
@@ -111,11 +112,11 @@ class UserControllerTest {
         controller.addUser(user2);
         controller.addFriend(1, 2);
 
-        assertTrue(user1.getFriends().contains(user2));
+        assertTrue(user1.getFriends().contains(2));
 
         controller.removeFriend(1, 2);
 
-        assertFalse(user1.getFriends().contains(user2));
+        assertFalse(user1.getFriends().contains(2));
         assertThrows(NotFoundException.class, () -> controller.removeFriend(1, 999));
     }
 
@@ -132,8 +133,8 @@ class UserControllerTest {
         controller.addFriend(1, 2);
         controller.addFriend(1, 3);
 
-        assertEquals(List.of(user3, user2), controller.getFriendsList(1));
-        assertEquals(List.of(), controller.getFriendsList(2));
+        assertEquals(Set.of(user3, user2), controller.getFriendsList(1));
+        assertEquals(Set.of(), controller.getFriendsList(2));
     }
 
     @Test
