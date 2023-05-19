@@ -2,9 +2,12 @@ package ru.yandex.practicum.filmorate.Controllers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.services.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -67,5 +70,86 @@ class UserControllerTest {
 
         assertEquals(user, controller.getUsersList().get(0));
 
+    }
+
+    @Test
+    public void shouldGetUserById() {
+        User user1 = unit.getUser();
+        User user2 = unit.getUser();
+        User user3 = unit.getUser();
+
+        controller.addUser(user1);
+        controller.addUser(user2);
+        controller.addUser(user3);
+
+        assertEquals(user1, controller.getUserById(1));
+        assertEquals(user2, controller.getUserById(2));
+        assertEquals(user3, controller.getUserById(3));
+        assertThrows(NotFoundException.class, () -> controller.getUserById(999));
+    }
+
+    @Test
+    public void shouldAddFriend() {
+        User user1 = unit.getUser();
+        User user2 = unit.getUser();
+
+        controller.addUser(user1);
+        controller.addUser(user2);
+        controller.addFriend(1, 2);
+
+        assertTrue(user1.getFriends().contains(user2));
+        assertThrows(NotFoundException.class, () -> controller.addFriend(1, 9999));
+        assertThrows(NotFoundException.class, () -> controller.addFriend(2, -1));
+    }
+
+    @Test
+    public void shouldUnfriend() {
+        User user1 = unit.getUser();
+        User user2 = unit.getUser();
+
+        controller.addUser(user1);
+        controller.addUser(user2);
+        controller.addFriend(1, 2);
+
+        assertTrue(user1.getFriends().contains(user2));
+
+        controller.removeFriend(1, 2);
+
+        assertFalse(user1.getFriends().contains(user2));
+        assertThrows(NotFoundException.class, () -> controller.removeFriend(1, 999));
+    }
+
+    @Test
+    public void shouldGetFriendList() {
+        User user1 = unit.getUser();
+        User user2 = unit.getUser();
+        User user3 = unit.getUser();
+
+        controller.addUser(user1);
+        controller.addUser(user2);
+        controller.addUser(user3);
+
+        controller.addFriend(1, 2);
+        controller.addFriend(1, 3);
+
+        assertEquals(List.of(user3, user2), controller.getFriendsList(1));
+        assertEquals(List.of(), controller.getFriendsList(2));
+    }
+
+    @Test
+    public void shouldGetMutualFriendList() {
+        User user1 = unit.getUser();
+        User user2 = unit.getUser();
+        User user3 = unit.getUser();
+
+        controller.addUser(user1);
+        controller.addUser(user2);
+        controller.addUser(user3);
+
+        controller.addFriend(1,3);
+        controller.addFriend(2, 3);
+
+        assertEquals(List.of(user3), controller.getMutualFriends(1, 2));
+        assertEquals(List.of(), controller.getMutualFriends(1, 3));
     }
 }
