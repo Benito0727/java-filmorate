@@ -9,10 +9,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -53,6 +50,7 @@ public class UserService {
         try {
             if (isUserInStorage(id) && isUserInStorage(friendId)) {
                 userStorage.getUser(id).addFriends(friendId);
+                userStorage.getUser(friendId).addFriends(id);
             }
             return userStorage.getUser(id);
         } catch (ValidationException exception) {
@@ -67,6 +65,7 @@ public class UserService {
             if (isUserInStorage(id) && isUserInStorage(friendId)) {
                 log.info("Пользователь " + friendId + " удален из друзей пользователя " + id);
                 userStorage.getUser(id).removeFriends(friendId);
+                userStorage.getUser(friendId).removeFriends(id);
                 return userStorage.getUser(id);
             }
             throw new RuntimeException("Ошибка удаления из друзей");
@@ -88,7 +87,7 @@ public class UserService {
     }
 
     public Set<User> getFriendList(int id) {
-        Set<User> friendSet = new HashSet<>();
+        Set<User> friendSet = new TreeSet<>(Comparator.comparing(User::getId));
         for (Integer friend : userStorage.getUser(id).getFriends()) {
             friendSet.add(userStorage.getUser(friend));
         }
