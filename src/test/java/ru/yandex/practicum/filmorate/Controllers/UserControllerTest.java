@@ -134,7 +134,7 @@ class UserControllerTest {
         controller.addFriend(1, 3);
 
         assertEquals(Set.of(user3, user2), controller.getFriendsList(1));
-        assertEquals(Set.of(), controller.getFriendsList(2));
+        assertEquals(Set.of(user1), controller.getFriendsList(2));
     }
 
     @Test
