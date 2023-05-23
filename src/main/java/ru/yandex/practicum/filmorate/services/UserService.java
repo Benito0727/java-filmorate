@@ -67,16 +67,17 @@ public class UserService {
     }
 
     public List<User> getMutualFriends(int userId, int otherUserId) {
-        return userStorage.getUser(userId).getFriends().stream().
-                filter(userStorage.getUser(otherUserId).getFriends()::contains).
-                map(userStorage::getUser).collect(Collectors.toList());
+        return userStorage.getUser(userId).getFriends().stream()
+                .filter(userStorage.getUser(otherUserId).getFriends()::contains)
+                .map(userStorage::getUser)
+                .collect(Collectors.toList());
     }
 
     public List<User> getFriendList(int id) {
-        return userStorage.getUser(id).getFriends().stream().
-                map(userStorage::getUser).
-                sorted(Comparator.comparing(User::getId)).
-                collect(Collectors.toList());
+        return userStorage.getUser(id).getFriends().stream()
+                .map(userStorage::getUser)
+                .sorted(Comparator.comparing(User::getId))
+                .collect(Collectors.toList());
     }
 
     private boolean isUserInStorage(int id) {
