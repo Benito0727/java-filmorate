@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.services.UserService;
 import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @Slf4j
@@ -91,7 +90,7 @@ public class UserController {
     получить список друзей пользователя
      */
     @GetMapping("/users/{id}/friends")
-    public Set<User> getFriendsList(@PathVariable int id) {
+    public List<User> getFriendsList(@PathVariable int id) {
         return userService.getFriendList(id);
     }
 
@@ -101,7 +100,7 @@ public class UserController {
     @GetMapping("/users/{id}/friends/common/{friendId}")
     public List<User> getMutualFriends(@PathVariable(value = "id") int id,
                                        @PathVariable(value = "friendId") int friendId) {
-        return userService.getMutualFriends(userService.getUser(id), userService.getUser(friendId));
+        return userService.getMutualFriends(id, friendId);
     }
 
     private boolean isValid(@org.jetbrains.annotations.NotNull User user) {

@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.services.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -133,8 +132,8 @@ class UserControllerTest {
         controller.addFriend(1, 2);
         controller.addFriend(1, 3);
 
-        assertEquals(Set.of(user3, user2), controller.getFriendsList(1));
-        assertEquals(Set.of(user1), controller.getFriendsList(2));
+        assertEquals(List.of(user2, user3), controller.getFriendsList(1));
+        assertEquals(List.of(user1), controller.getFriendsList(2));
     }
 
     @Test

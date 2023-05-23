@@ -34,7 +34,8 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User removeUser(@NotNull User user) {
         if (users.get(user.getId()) == null) {
-            throw new NotFoundException(String.format("Пользователь с id %d", user.getId()));
+            log.warn(String.format("Пользователь с id %d не найден", user.getId()));
+            throw new NotFoundException(String.format("Пользователь с id %d не найден", user.getId()));
         }
         users.remove(user.getId());
         return user;

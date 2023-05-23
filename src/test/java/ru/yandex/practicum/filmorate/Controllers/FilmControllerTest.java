@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.services.FilmService;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +25,7 @@ class FilmControllerTest {
 
     @BeforeEach
     public void setup() {
-        filmService = new FilmService(new InMemoryFilmStorage(), new InMemoryUserStorage());
+        filmService = new FilmService(new InMemoryFilmStorage());
         controller = new FilmController(filmService);
     }
 
@@ -108,7 +107,7 @@ class FilmControllerTest {
 
         assertEquals(Set.of(1), film1.getLikes());
         assertThrows(NotFoundException.class, () -> controller.removeLike(999, 1));
-
+        System.out.println(controller.getFilms());
         controller.removeLike(1,1);
         assertEquals(Set.of(), film1.getLikes());
     }

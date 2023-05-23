@@ -34,8 +34,8 @@ public class FilmController {
 
     @PostMapping("/films")
     public Film addFilm(@Valid @RequestBody @NotNull Film film) {
-        if (isValid(film)) return filmService.addFilm(film);
-        return film;
+        isValid(film);
+        return filmService.addFilm(film);
     }
 
     /*
@@ -66,8 +66,8 @@ public class FilmController {
 
     @PutMapping(value = "/films", produces = APPLICATION_JSON_VALUE)
     public Film updateFilm(@Valid @RequestBody @NotNull Film film) {
-        if (isValid(film)) return filmService.updateFilm(film);
-        return film;
+        isValid(film);
+        return filmService.updateFilm(film);
     }
 
     /*
@@ -98,8 +98,7 @@ public class FilmController {
         return filmService.getMostPopularFilm(count);
     }
 
-    private boolean isValid(@NotNull Film film) {
-        boolean valid;
+    private void isValid(@NotNull Film film) {
         int descLength = film.getDescription().length();
         try {
             if (isIncorrectName(film.getName())) {
@@ -118,11 +117,10 @@ public class FilmController {
                 log.warn("у фильма отрицательная или нулевая продолжительность: {}", film.getDuration());
                 throw new ValidationException("Продолжительность фильмы должна быть положительной");
             }
-            valid = true;
+
         } catch (ValidationException exception) {
             throw new ValidationException(exception.getMessage());
         }
-        return valid;
     }
 
     private boolean isIncorrectName(@NotNull String name) {

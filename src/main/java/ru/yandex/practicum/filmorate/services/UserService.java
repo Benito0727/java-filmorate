@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.services;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -10,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -27,15 +27,7 @@ public class UserService {
     }
 
     public User getUser(int id) {
-        try {
-            if (userStorage.getUser(id) != null) {
-                return userStorage.getUser(id);
-            } else {
-                throw new NotFoundException("По запросу ничего не найдено");
-            }
-        } catch (NotFoundException exception) {
-            throw new NotFoundException(exception.getMessage());
-        }
+        return userStorage.getUser(id);
     }
 
     public User updateUser(User user) {
@@ -69,29 +61,22 @@ public class UserService {
                 return userStorage.getUser(id);
             }
             throw new RuntimeException("Ошибка удаления из друзей");
-        } catch (ValidationException exception) {
-            throw new ValidationException(exception.getMessage());
         } catch (NotFoundException exception) {
             throw new NotFoundException(exception.getMessage());
         }
     }
 
-    public List<User> getMutualFriends(@NotNull User user, User otherUser) {
-        ArrayList<User> mutualFriends = new ArrayList<>();
-        for (Integer friend : user.getFriends()) {
-            if (otherUser.getFriends().contains(friend)) {
-                mutualFriends.add(userStorage.getUser(friend));
-            }
-        }
-        return mutualFriends;
+    public List<User> getMutualFriends(int userId, int otherUserId) {
+        return userStorage.getUser(userId).getFriends().stream().
+                filter(userStorage.getUser(otherUserId).getFriends()::contains).
+                map(userStorage::getUser).collect(Collectors.toList());
     }
 
-    public Set<User> getFriendList(int id) {
-        Set<User> friendSet = new TreeSet<>(Comparator.comparing(User::getId));
-        for (Integer friend : userStorage.getUser(id).getFriends()) {
-            friendSet.add(userStorage.getUser(friend));
-        }
-        return friendSet;
+    public List<User> getFriendList(int id) {
+        return userStorage.getUser(id).getFriends().stream().
+                map(userStorage::getUser).
+                sorted(Comparator.comparing(User::getId)).
+                collect(Collectors.toList());
     }
 
     private boolean isUserInStorage(int id) {

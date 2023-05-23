@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,7 +17,7 @@ public class FilmService {
     private final InMemoryFilmStorage filmStorage;
 
     @Autowired
-    public FilmService(InMemoryFilmStorage filmStorage, InMemoryUserStorage userStorage) {
+    public FilmService(InMemoryFilmStorage filmStorage) {
         this.filmStorage = filmStorage;
     }
 
@@ -43,17 +42,19 @@ public class FilmService {
     }
 
     public Film addLike(int userId, int filmId) {  // поставить лайк
-        filmStorage.getFilm(filmId).setLikes(userId);
-        return filmStorage.getFilm(filmId);
+        Film film = filmStorage.getFilm(filmId);
+        film.setLikes(userId);
+        return film;
     }
 
     public Film removeLike(int userId, int filmId) {     // убрать лайк
-        if (!filmStorage.getFilm(filmId).getLikes().contains(userId)) {
+        Film film = filmStorage.getFilm(filmId);
+        if (!film.getLikes().contains(userId)) {
             throw new NotFoundException(String.format("Пользователь с id %d" +
                     " не ставил лайки под этим фильмом", userId));
         }
-        filmStorage.getFilm(filmId).removeLike(userId);
-        return filmStorage.getFilm(filmId);
+        film.removeLike(userId);
+        return film;
     }
 
     public Set<Film> getMostPopularFilm(int count) {       //получить список самых популярных фильмов
