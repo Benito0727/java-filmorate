@@ -1,25 +1,27 @@
 package ru.yandex.practicum.filmorate.Controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.services.UserService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @Slf4j
 public class UserController {
 
-    Map<Integer, User> users = new HashMap<>();
+    private final UserService userService;
 
-    private int userId = 1;
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     /*
     отдает список пользователей
@@ -27,7 +29,7 @@ public class UserController {
 
     @GetMapping("/users")
     public List<User> getUsersList() {
-        return new ArrayList<>(users.values());
+        return userService.getUserList();
     }
 
     /*
@@ -38,15 +40,17 @@ public class UserController {
     @PostMapping("/users")
     public User addUser(@Valid @RequestBody @NotNull User user) {
         if (isValid(user)) {
-            if (user.getName() == null) user.setName(user.getLogin());
-            if (user.getId() < 1) {
-                user.setId(userId);
-                userId++;
-            }
-            users.put(user.getId(), user);
-            log.info("Пользователь с ID: {} успешно создан", user.getId());
+            return userService.addUser(user);
         }
         return user;
+    }
+
+    /*
+    отдает пользователя по id
+     */
+    @GetMapping("/users/{id}")
+    public User getUserById(@PathVariable int id) {
+        return userService.getUser(id);
     }
 
     /*
@@ -56,24 +60,50 @@ public class UserController {
 
     @PutMapping("/users")
     public User updateUser(@Valid @RequestBody @NotNull User user) {
-        try {
-            if (isValid(user)) {
-                if (user.getName() == null) user.setName(user.getLogin());
-                if (users.containsKey(user.getId())) {
-                    log.info("Пользователь с ID: {} успешно обновлен", user.getId());
-                    users.put(user.getId(), user);
-                } else {
-                    log.warn("Попытка обновления несуществующего ID");
-                    throw new ValidationException("Несуществующий ID");
-                }
-            }
-        } catch (ValidationException exception) {
-            throw new RuntimeException(exception.getMessage());
+        if (isValid(user)) {
+            return userService.updateUser(user);
         }
         return user;
     }
 
-    private boolean isValid(User user) {
+    /*
+    Добавить пользователю с id в друзья пользователя с friendId
+     */
+    @PutMapping("/users/{id}/friends/{friendId}")
+    public User addFriend(@PathVariable(value = "id") int id,
+                          @PathVariable(value = "friendId")  int friendId) {
+        userService.addFriend(id, friendId);
+        return userService.getUser(friendId);
+    }
+
+    /*
+    Удалить из друзей пользователя id, пользователя friendId
+     */
+    @DeleteMapping("/users/{id}/friends/{friendId}")
+    public User removeFriend(@PathVariable(value = "id") int id,
+                             @PathVariable(value = "friendId") int friendId) {
+        userService.removeFriend(id, friendId);
+        return userService.getUser(id);
+    }
+
+    /*
+    получить список друзей пользователя
+     */
+    @GetMapping("/users/{id}/friends")
+    public List<User> getFriendsList(@PathVariable int id) {
+        return userService.getFriendList(id);
+    }
+
+    /*
+    получить список общих друзей пользователя id с friendId
+     */
+    @GetMapping("/users/{id}/friends/common/{friendId}")
+    public List<User> getMutualFriends(@PathVariable(value = "id") int id,
+                                       @PathVariable(value = "friendId") int friendId) {
+        return userService.getMutualFriends(id, friendId);
+    }
+
+    private boolean isValid(@org.jetbrains.annotations.NotNull User user) {
         boolean valid;
         try {
             if (isIncorrectEmail(user.getEmail())) {
@@ -95,11 +125,11 @@ public class UserController {
         return valid;
     }
 
-    private boolean isIncorrectLogin(String login) {
+    private boolean isIncorrectLogin(@NotNull String login) {
         return login.isEmpty() || login.contains(" ");
     }
 
-    private boolean isIncorrectEmail(String email) {
+    private boolean isIncorrectEmail(@NotNull String email) {
         return !email.contains("@");
     }
 }

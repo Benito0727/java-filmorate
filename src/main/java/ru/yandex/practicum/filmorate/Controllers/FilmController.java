@@ -1,18 +1,19 @@
 package ru.yandex.practicum.filmorate.Controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.services.FilmService;
+import org.jetbrains.annotations.NotNull;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -20,23 +21,21 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Slf4j
 public class FilmController {
 
-    Map<Integer, Film> films = new HashMap<>();
-    private int filmId = 1;
+    private final FilmService filmService;
+
+    @Autowired
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     /*
-    при соблюдении всех условий добавляет фильм в мапу
+    добавляет фильм в хранилище
      */
 
     @PostMapping("/films")
     public Film addFilm(@Valid @RequestBody @NotNull Film film) {
-        if (isValid(film)) {
-            if (film.getId() < 1) {
-                film.setId(filmId);
-                filmId++;
-            }
-            films.put(film.getId(), film);
-        }
-        return film;
+        isValid(film);
+        return filmService.addFilm(film);
     }
 
     /*
@@ -45,33 +44,61 @@ public class FilmController {
 
     @GetMapping("/films")
     public List<Film> getFilms() {
-        return new ArrayList<>(films.values());
+        try {
+            return filmService.getFilmsList();
+        } catch (NotFoundException exception) {
+            throw new NotFoundException(exception.getMessage());
+        }
     }
 
     /*
-    обновляет фильм который уже лежал в мапе
+    отдает фильм по id
+     */
+
+    @GetMapping("/films/{id}")
+    public Film getFilmById(@PathVariable int id) {
+        return filmService.getFilm(id);
+    }
+
+    /*
+    обновляет фильм который уже лежал в хранилище
      */
 
     @PutMapping(value = "/films", produces = APPLICATION_JSON_VALUE)
     public Film updateFilm(@Valid @RequestBody @NotNull Film film) {
-        try {
-            if (isValid(film)) {
-                if (films.containsKey(film.getId())) {
-                    films.put(film.getId(), film);
-                    log.info("Фильм с ID: {} успешно обновлен", film.getId());
-                } else {
-                    log.warn("Попытка обновления несуществующего ID");
-                    throw new ValidationException("Несуществующий ID");
-                }
-            }
-        } catch (ValidationException exception) {
-            throw new RuntimeException(exception.getMessage());
-        }
-        return film;
+        isValid(film);
+        return filmService.updateFilm(film);
     }
 
-    private boolean isValid(Film film) {
-        boolean valid;
+    /*
+        пользователь userId ставит лайк фильму filmId
+     */
+
+    @PutMapping("/films/{id}/like/{userId}")
+    public Film setLike(@PathVariable(value = "id") int filmId,
+                        @PathVariable(value = "userId") int userId) {
+        return filmService.addLike(userId, filmId);
+    }
+
+    /*
+    пользователь userId убирает лайк у фильма filmId
+     */
+
+    @DeleteMapping("/films/{id}/like/{userId}")
+    public Film removeLike(@PathVariable(value = "id") int filmId,
+                           @PathVariable(value = "userId") int userId) {
+        return filmService.removeLike(userId, filmId);
+    }
+
+    /*
+    получить самые залайканые фильмы в количестве count, либо первая десятка
+     */
+    @GetMapping("/films/popular")
+    public Set<Film> getMostPopularFilm(@RequestParam(defaultValue = "10") int count) {
+        return filmService.getMostPopularFilm(count);
+    }
+
+    private void isValid(@NotNull Film film) {
         int descLength = film.getDescription().length();
         try {
             if (isIncorrectName(film.getName())) {
@@ -90,14 +117,13 @@ public class FilmController {
                 log.warn("у фильма отрицательная или нулевая продолжительность: {}", film.getDuration());
                 throw new ValidationException("Продолжительность фильмы должна быть положительной");
             }
-            valid = true;
+
         } catch (ValidationException exception) {
-            throw new RuntimeException(exception.getMessage());
+            throw new ValidationException(exception.getMessage());
         }
-        return valid;
     }
 
-    private boolean isIncorrectName(String name) {
+    private boolean isIncorrectName(@NotNull String name) {
         return name.isBlank() || name.isEmpty();
     }
 }
