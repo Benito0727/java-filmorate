@@ -86,13 +86,6 @@ public class Film {
         }
     }
 
-    /*
-    G,
-    PG,
-    PG13,
-    R,
-    NC17
-     */
     public void setRating(String newRating) {
         switch (newRating) {
             case "G" :
