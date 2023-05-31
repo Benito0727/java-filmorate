@@ -85,4 +85,31 @@ public class Film {
                 break;
         }
     }
+
+    /*
+    G,
+    PG,
+    PG13,
+    R,
+    NC17
+     */
+    public void setRating(String newRating) {
+        switch (newRating) {
+            case "G" :
+                rating = Rating.G;
+                break;
+            case "PG" :
+                rating = Rating.PG;
+                break;
+            case "PG-13" :
+                rating = Rating.PG13;
+                break;
+            case "R" :
+                rating = Rating.R;
+                break;
+            case "NC-17" :
+                rating = Rating.NC17;
+                break;
+        }
+    }
 }
