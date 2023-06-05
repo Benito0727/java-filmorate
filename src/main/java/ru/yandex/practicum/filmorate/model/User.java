@@ -25,8 +25,9 @@ public class User {
     @PastOrPresent
     private LocalDate birthday;     // день рождения пользователя
 
-    private Set<Integer> friends = new HashSet<>();
+    private Set<Integer> friends = new HashSet<>();  // список друзей пользователя
 
+    private boolean friendship;  // статус дружбы true - подтвержденная, false - неподтвержденная
     public void removeFriends(int id) {
         friends.remove(id);
     }
