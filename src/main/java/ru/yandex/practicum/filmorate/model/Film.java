@@ -1,33 +1,48 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.storage.dao.mappers.databaseEntities.Genre;
+import ru.yandex.practicum.filmorate.storage.dao.mappers.databaseEntities.Mpa;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Data
 public class Film {
 
-    private int id;                     // ID фильмы
+    private int id;                                             // ID фильмы
 
     @NotEmpty()
-    private String name;                // название фильма
+    private String name;                                        // название фильма
 
-    private String description;         // описание фильма
+    private String description;                                 // описание фильма
 
-    private LocalDate releaseDate;      // дата релиза фильма
+    private LocalDate releaseDate;                              // дата релиза фильма
 
     @Positive
-    private int duration;          // продолжительность фильма
+    private int duration;                                       // продолжительность фильма
 
-    private Set<Integer> likes = new HashSet<>(); // лайки фильма
+    private Set<Integer> likes = new HashSet<>();               // лайки фильма
 
-    private Set<Enum<Genre>> genres = new HashSet<>();
+    @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+    private Set<Genre> genres = new HashSet<>();      // жанры фильма
 
-    private Enum<Rating> rating;
+    private Mpa mpa;         // рейтинг фильма
+
+    public Film() {
+
+    }
+
+    public Film(int id, String name, String description, LocalDate releaseDate, int duration) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+    }
 
     public void setLikes(int userId) {
         likes.add(userId);
@@ -36,73 +51,5 @@ public class Film {
 
     public void removeLike(int userId) {
         likes.remove(userId);
-    }
-
-
-    public void addGenre(String genre) {
-
-        switch (genre) {
-            case "Comedy" :
-                genres.add(Genre.COMEDY);
-                break;
-            case "Drama" :
-                genres.add(Genre.DRAMA);
-                break;
-            case "Cartoon" :
-                genres.add(Genre.CARTOON);
-                break;
-            case "Thriller" :
-                genres.add(Genre.THRILLER);
-                break;
-            case "Documentary" :
-                genres.add(Genre.DOCUMENTARY);
-                break;
-            case "Action" :
-                genres.add(Genre.ACTION);
-                break;
-        }
-    }
-
-    public void removeGenre(String genre) {
-        switch (genre) {
-            case "Comedy" :
-                genres.remove(Genre.COMEDY);
-                break;
-            case "Drama" :
-                genres.remove(Genre.DRAMA);
-                break;
-            case "Cartoon" :
-                genres.remove(Genre.CARTOON);
-                break;
-            case "Thriller" :
-                genres.remove(Genre.THRILLER);
-                break;
-            case "Documentary" :
-                genres.remove(Genre.DOCUMENTARY);
-                break;
-            case "Action" :
-                genres.remove(Genre.ACTION);
-                break;
-        }
-    }
-
-    public void setRating(String newRating) {
-        switch (newRating) {
-            case "G" :
-                rating = Rating.G;
-                break;
-            case "PG" :
-                rating = Rating.PG;
-                break;
-            case "PG-13" :
-                rating = Rating.PG13;
-                break;
-            case "R" :
-                rating = Rating.R;
-                break;
-            case "NC-17" :
-                rating = Rating.NC17;
-                break;
-        }
     }
 }

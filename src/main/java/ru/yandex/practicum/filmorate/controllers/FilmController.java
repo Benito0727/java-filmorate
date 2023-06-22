@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.Controllers;
+package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,10 +8,11 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.services.FilmService;
 import org.jetbrains.annotations.NotNull;
+import ru.yandex.practicum.filmorate.storage.dao.mappers.databaseEntities.Genre;
+import ru.yandex.practicum.filmorate.storage.dao.mappers.databaseEntities.Rating;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.List;
 import java.util.Set;
 
@@ -85,9 +86,14 @@ public class FilmController {
      */
 
     @DeleteMapping("/films/{id}/like/{userId}")
-    public Film removeLike(@PathVariable(value = "id") int filmId,
+    public void removeLike(@PathVariable(value = "id") int filmId,
                            @PathVariable(value = "userId") int userId) {
-        return filmService.removeLike(userId, filmId);
+        filmService.removeLike(userId, filmId);
+    }
+
+    @DeleteMapping("/films/{id}")
+    public void deleteFilm(@PathVariable(value = "id") int id) {
+        filmService.removeFilm(id);
     }
 
     /*
@@ -96,6 +102,28 @@ public class FilmController {
     @GetMapping("/films/popular")
     public Set<Film> getMostPopularFilm(@RequestParam(defaultValue = "10") int count) {
         return filmService.getMostPopularFilm(count);
+    }
+
+    // todo
+    @GetMapping("/genres")
+    public Set<Genre> getFilmGenres() {
+        return filmService.getFilmGenres();
+    }
+
+    //todo
+    @GetMapping("/genres/{id}")
+    public Genre getGenreById(@PathVariable int id) {
+        return filmService.getFilmGenreById(id);
+    }
+
+    @GetMapping("/mpa")
+    public Set<Rating> getMPA() {
+        return filmService.getFilmsRatings();
+    }
+
+    @GetMapping("/mpa/{id}")
+    public Rating getMPAById(@PathVariable int id) {
+        return filmService.getRatingById(id);
     }
 
     private void isValid(@NotNull Film film) {
@@ -109,7 +137,7 @@ public class FilmController {
                 log.warn("Слишком длинное описание фильма - {} символов", film.getDescription().length());
                 throw new ValidationException("Описание должно быть менее 200 символов");
             }
-            if (film.getReleaseDate().isBefore(LocalDate.of(1895, Month.DECEMBER, 28))) {
+            if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
                 log.warn("Ошибка в дате релиза фильма: {}", film.getReleaseDate());
                 throw new ValidationException("Фильм не мог быть снять до 28 декабря 1895 года");
             }
@@ -122,6 +150,8 @@ public class FilmController {
             throw new ValidationException(exception.getMessage());
         }
     }
+
+
 
     private boolean isIncorrectName(@NotNull String name) {
         return name.isBlank() || name.isEmpty();

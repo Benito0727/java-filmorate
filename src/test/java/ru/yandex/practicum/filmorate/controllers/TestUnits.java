@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.Controllers;
+package ru.yandex.practicum.filmorate.controllers;
 
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;

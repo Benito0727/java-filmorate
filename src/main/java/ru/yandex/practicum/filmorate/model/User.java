@@ -25,15 +25,37 @@ public class User {
     @PastOrPresent
     private LocalDate birthday;     // день рождения пользователя
 
-    private Set<Integer> friends = new HashSet<>();  // список друзей пользователя
-
-    private boolean friendship;  // статус дружбы true - подтвержденная, false - неподтвержденная
+    private HashMap<Integer, Boolean> friends = new HashMap<>();  // список друзей пользователя (true - дружба, false - подписка)
     public void removeFriends(int id) {
         friends.remove(id);
     }
 
     public void addFriends(int id) {
-        friends.add(id);
+        friends.put(id, false);
     }
 
+    public User() {}
+
+    public User(String email, String login, String name, LocalDate birthday) {
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        this.birthday = birthday;
+    }
+
+    public User(int id, String email, String login, String name, LocalDate birthday) {
+        this.id = id;
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        this.birthday = birthday;
+    }
+
+    public void updateFriend(int id, boolean friendship) {
+        friends.put(id, friendship);
+    }
+
+    public LocalDate getBirthday() {
+        return this.birthday;
+    }
 }

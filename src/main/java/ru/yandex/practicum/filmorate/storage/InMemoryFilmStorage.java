@@ -5,14 +5,33 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.dao.mappers.databaseEntities.Genre;
+import ru.yandex.practicum.filmorate.storage.dao.mappers.databaseEntities.Rating;
 
 import java.util.*;
 
-@Component
+@Component("InMemoryFilmStorage")
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Integer, Film> films = new HashMap<>();
+
+    private final TreeSet<Rating> ratings = new TreeSet<>(Set.of(
+            new Rating(1, "G"),
+            new Rating(2, "PG"),
+            new Rating(3, "PG-13"),
+            new Rating(4, "R"),
+            new Rating(5, "NC-17")
+    ));
+
+    private final TreeSet<Genre> genres = new TreeSet<>(Set.of(
+            new Genre(1, "COMEDY"),
+            new Genre(2, "DRAMA"),
+            new Genre(3, "CARTOON"),
+            new Genre(4, "THRILLER"),
+            new Genre(5, "DOCUMENTARY"),
+            new Genre(6, "ACTION")
+    ));
 
     private final TreeSet<Film> mostPopularFilms;
 
@@ -35,9 +54,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getFilm(int id) {  // получить фильм по ид
+    public Optional<Film> getFilm(int id) {  // получить фильм по ид
         if (films.get(id) != null) {
-            return films.get(id);
+            return Optional.of(films.get(id));
         } else {
             log.warn(String.format("Фильм с id %d не найден", id));
             throw new NotFoundException(String.format("фильм с id %d не найден", id));
@@ -45,16 +64,15 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film removeFilm(@NotNull Film film) {  // удалить фильм
-        if (!films.containsValue(film)) {
-            throw new NotFoundException(String.format("Фильм с id %d не найден", film.getId()));
+    public void removeFilm(int id) {  // удалить фильм
+        if (!films.containsKey(id)) {
+            throw new NotFoundException(String.format("Фильм с id %d не найден", id));
         }
-        films.remove(film.getId());
-        return film;
+        films.remove(id);
     }
 
     @Override
-    public Film updateFilm(@NotNull Film film) {  // обновить существующий фильм
+    public Optional<Film> updateFilm(@NotNull Film film) {  // обновить существующий фильм
         try {
             if (films.containsKey(film.getId())) {
                 films.put(film.getId(), film);
@@ -67,7 +85,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         } catch (NotFoundException exception) {
             throw new NotFoundException(exception.getMessage());
         }
-        return film;
+        return Optional.of(film);
     }
 
     @Override
@@ -77,7 +95,26 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     public Set<Film> getMostPopularFilms() {
         mostPopularFilms.addAll(films.values());
-        NavigableSet<Film> filmByCount = mostPopularFilms.descendingSet();
-        return filmByCount;
+        return mostPopularFilms.descendingSet();
+    }
+
+    @Override
+    public Set<Genre> getGenres() {
+        return new HashSet<>(genres);
+    }
+
+    @Override
+    public Optional<Genre> getGenreById(int id) {
+        return Optional.of(new ArrayList<>(genres).get(id));
+    }
+
+    @Override
+    public Set<Rating> getRatings() {
+        return ratings.descendingSet();
+    }
+
+    @Override
+    public Optional<Rating> getRatingById(int id) {
+        return Optional.of(new ArrayList<>(ratings).get(id));
     }
 }
