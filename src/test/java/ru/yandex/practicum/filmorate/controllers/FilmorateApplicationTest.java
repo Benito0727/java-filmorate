@@ -104,12 +104,12 @@ public class FilmorateApplicationTest {
         System.out.println(genres);
         assertThat(genres.size() == 6).isTrue();
         Set<Genre> genreSet = Set.of(
-                new Genre(1, "COMEDY"),
-                new Genre(2, "DRAMA"),
-                new Genre(3, "CARTOON"),
-                new Genre(4, "THRILLER"),
-                new Genre(5, "DOCUMENTARY"),
-                new Genre(6, "ACTION")
+                new Genre(1, "Комедия"),
+                new Genre(2, "Драма"),
+                new Genre(3, "Мультфильм"),
+                new Genre(4, "Триллер"),
+                new Genre(5, "Документальный"),
+                new Genre(6, "Боевик")
         );
 
         assertThat(genres.equals(genreSet)).isTrue();
@@ -132,7 +132,7 @@ public class FilmorateApplicationTest {
                 .hasValueSatisfying(genre ->
                         assertThat(genre).hasFieldOrPropertyWithValue("id", 2))
                 .hasValueSatisfying(genre ->
-                        assertThat(genre).hasFieldOrPropertyWithValue("name", "DRAMA"));
+                        assertThat(genre).hasFieldOrPropertyWithValue("name", "Драма"));
 
         Optional<Rating> optionalRating = filmStorage.getRatingById(4);
 
