@@ -215,23 +215,6 @@ public class FilmDBStorage implements FilmStorage {
         return mostPopularFilms.descendingSet();
     }
 
-   /*
-   COMEDY,      -- 1
-   DRAMA,       -- 2
-   CARTOON,     -- 3
-   THRILLER,    -- 4
-   DOCUMENTARY, -- 5
-   ACTION       -- 6
-   */
-
-    /*
-    G,      -- 1
-    PG,     -- 2
-    PG-13,  -- 3
-    R,      -- 4
-    NC-17   -- 5
-     */
-
     @Override
     public Set<Genre> getGenres() {
         String sqlQuery = "SELECT *" +

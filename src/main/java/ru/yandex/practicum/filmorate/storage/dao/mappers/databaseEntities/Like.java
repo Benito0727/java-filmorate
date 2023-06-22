@@ -8,5 +8,4 @@ public class Like {
     private Integer userId;
 
     private Integer filmId;
-
 }

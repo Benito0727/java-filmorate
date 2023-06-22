@@ -26,6 +26,7 @@ public class User {
     private LocalDate birthday;     // день рождения пользователя
 
     private HashMap<Integer, Boolean> friends = new HashMap<>();  // список друзей пользователя (true - дружба, false - подписка)
+
     public void removeFriends(int id) {
         friends.remove(id);
     }
@@ -34,7 +35,9 @@ public class User {
         friends.put(id, false);
     }
 
-    public User() {}
+    public User() {
+
+    }
 
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;
