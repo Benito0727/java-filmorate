@@ -38,7 +38,6 @@ public class FilmDBStorage implements FilmStorage {
                 filmId = Collections.max(filmsIds);
             }
             film.setId(++filmId);
-            filmsIds.add(filmId);
         }
         String sqlQuery = "INSERT INTO FILMS (FILM_ID, TITLE, DESCRIPTION, DURATION, RELEASE_DATE)" +
                 " VALUES(?, ?, ?, ?, ?);";
@@ -174,8 +173,6 @@ public class FilmDBStorage implements FilmStorage {
         jdbcTemplate.update(sqlGenresDelete, film.getId());
     }
 
-
-    // todo
     @Override
     public List<Film> getFilmsList() {
         String sqlFilmQuery = "SELECT * FROM films";

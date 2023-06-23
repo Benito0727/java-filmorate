@@ -69,9 +69,10 @@ public class FilmService {
     }
 
     public Genre getFilmGenreById(int id) {
-        if (filmStorage.getGenreById(id).isPresent()) {
+        Optional<Genre> genre = filmStorage.getGenreById(id);
+        if (genre.isPresent()) {
             log.info(String.format("Вернули жанр с ID %d", id));
-            return filmStorage.getGenreById(id).get();
+            return genre.get();
         } else {
             log.warn(String.format("Не нашли жанр с ID %d", id));
             throw new NotFoundException(String.format("Нет жанра с ID %d", id));
@@ -83,9 +84,10 @@ public class FilmService {
     }
 
     public Rating getRatingById(int id) {
-        if (filmStorage.getRatingById(id).isPresent()) {
+        Optional<Rating> rating = filmStorage.getRatingById(id);
+        if (rating.isPresent()) {
            log.info(String.format("Вернули рейтингом с ID %d", id));
-           return filmStorage.getRatingById(id).get();
+           return rating.get();
         } else {
            log.warn(String.format("Не нашли рейтинг с ID %d", id));
            throw new NotFoundException(String.format("Нет рейтинга с ID %d", id));

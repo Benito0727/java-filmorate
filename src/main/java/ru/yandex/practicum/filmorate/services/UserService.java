@@ -27,16 +27,18 @@ public class UserService {
     }
 
     public User getUser(int id) {
-        if (userStorage.getUser(id).isPresent()) {
-            return userStorage.getUser(id).get();
+        Optional<User> user = userStorage.getUser(id);
+        if (user.isPresent()) {
+            return user.get();
         } else {
             throw new NotFoundException(String.format("Пользователь с ID %d не найден", id));
         }
     }
 
     public User updateUser(User user) {
-        if (userStorage.updateUser(user).isPresent()) {
-            return userStorage.updateUser(user).get();
+        Optional<User> optUser = userStorage.updateUser(user);
+        if (optUser.isPresent()) {
+            return optUser.get();
         } else {
             throw new NotFoundException(String.format("Пользователь с ID %d не найден", user.getId()));
         }
@@ -47,21 +49,20 @@ public class UserService {
     }
 
     public User addFriend(int id, int friendId) {
-        if (userStorage.getUser(id).isPresent()) {
-            if (userStorage.getUser(friendId).isPresent()) {
-                User user = userStorage.getUser(id).get();
-                User friend = userStorage.getUser(friendId).get();
-                user.addFriends(friendId);
-
-                if (friend.getFriends().containsKey(id)) {
-                    user.updateFriend(friendId, true);
-                    friend.updateFriend(id, true);
+        Optional<User> user = userStorage.getUser(id);
+        Optional<User> friend = userStorage.getUser(friendId);
+        if (user.isPresent()) {
+            if (friend.isPresent()) {
+                user.get().addFriends(friendId);
+                if (friend.get().getFriends().containsKey(id)) {
+                    user.get().updateFriend(friendId, true);
+                    friend.get().updateFriend(id, true);
                 }
 
-                userStorage.updateUser(user);
-                userStorage.updateUser(friend);
+                userStorage.updateUser(user.get());
+                userStorage.updateUser(friend.get());
 
-                return userStorage.getUser(id).get();
+                return user.get();
             } else {
                 throw new NotFoundException(String.format("Не нашли друга с ID %d", friendId));
             }
@@ -95,7 +96,6 @@ public class UserService {
         }
     }
 
-    // todo
     public List<User> getMutualFriends(int userId, int otherUserId) {
         Optional<User> user = userStorage.getUser(userId);
         Optional<User> otherUser = userStorage.getUser(otherUserId);
@@ -117,7 +117,6 @@ public class UserService {
         }
     }
 
-    //todo
     public List<User> getFriendList(int id) {
         if (userStorage.getUser(id).isPresent()) {
             User user = userStorage.getUser(id).get();
@@ -131,7 +130,9 @@ public class UserService {
                     throw new NotFoundException();
                 }
             }
-            return users.stream().sorted(Comparator.comparing(User::getId)).collect(Collectors.toList());
+            return users.stream()
+                    .sorted(Comparator.comparing(User::getId))
+                    .collect(Collectors.toList());
         } else {
             throw new NotFoundException();
         }

@@ -39,7 +39,6 @@ public class UserDBStorage implements UserStorage {
                 userId = Collections.max(usersId);
             }
             user.setId(++userId);
-            usersId.add(userId);
         }
         if (user.getName().isBlank()) {
             user.setName(user.getLogin());

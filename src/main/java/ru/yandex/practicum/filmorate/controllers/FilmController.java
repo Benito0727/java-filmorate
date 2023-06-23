@@ -104,13 +104,11 @@ public class FilmController {
         return filmService.getMostPopularFilm(count);
     }
 
-    // todo
     @GetMapping("/genres")
     public Set<Genre> getFilmGenres() {
         return filmService.getFilmGenres();
     }
 
-    //todo
     @GetMapping("/genres/{id}")
     public Genre getGenreById(@PathVariable int id) {
         return filmService.getFilmGenreById(id);
