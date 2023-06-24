@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.Controllers;
+package ru.yandex.practicum.filmorate.controllers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -97,7 +97,7 @@ class UserControllerTest {
         controller.addUser(user2);
         controller.addFriend(1, 2);
 
-        assertTrue(user1.getFriends().contains(2));
+        assertTrue(user1.getFriends().containsKey(2));
         assertThrows(NotFoundException.class, () -> controller.addFriend(1, 9999));
         assertThrows(NotFoundException.class, () -> controller.addFriend(2, -1));
     }
@@ -111,11 +111,11 @@ class UserControllerTest {
         controller.addUser(user2);
         controller.addFriend(1, 2);
 
-        assertTrue(user1.getFriends().contains(2));
+        assertTrue(user1.getFriends().containsKey(2));
 
         controller.removeFriend(1, 2);
 
-        assertFalse(user1.getFriends().contains(2));
+        assertFalse(user1.getFriends().containsKey(2));
         assertThrows(NotFoundException.class, () -> controller.removeFriend(1, 999));
     }
 
@@ -131,6 +131,8 @@ class UserControllerTest {
 
         controller.addFriend(1, 2);
         controller.addFriend(1, 3);
+
+        controller.addFriend(2, 1);
 
         assertEquals(List.of(user2, user3), controller.getFriendsList(1));
         assertEquals(List.of(user1), controller.getFriendsList(2));

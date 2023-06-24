@@ -6,12 +6,9 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-@Component
+@Component("InMemoryUserStorage")
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
 
@@ -42,7 +39,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User updateUser(@NotNull User user) {
+    public Optional<User> updateUser(@NotNull User user) {
         try {
             if (user.getName() == null || user.getName().isBlank()) user.setName(user.getLogin());
             if (users.containsKey(user.getId())) {
@@ -55,7 +52,7 @@ public class InMemoryUserStorage implements UserStorage {
         } catch (NotFoundException exception) {
             throw new NotFoundException(exception.getMessage());
         }
-        return user;
+        return Optional.of(user);
     }
 
     @Override
@@ -69,9 +66,9 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUser(int id) {
+    public Optional<User> getUser(int id) {
         if (users.get(id) != null) {
-            return users.get(id);
+            return Optional.of(users.get(id));
         } else {
             log.warn(String.format("Пользователь с id %d не найден", id));
             throw new NotFoundException(String.format("Пользователь с id %d не найден", id));

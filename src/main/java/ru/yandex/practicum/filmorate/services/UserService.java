@@ -2,11 +2,11 @@ package ru.yandex.practicum.filmorate.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
 
-    private final InMemoryUserStorage userStorage;
+    private final UserStorage userStorage;
 
     @Autowired
-    public UserService(InMemoryUserStorage userStorage) {
+    public UserService(@Qualifier("UserDBStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
@@ -27,11 +27,21 @@ public class UserService {
     }
 
     public User getUser(int id) {
-        return userStorage.getUser(id);
+        Optional<User> user = userStorage.getUser(id);
+        if (user.isPresent()) {
+            return user.get();
+        } else {
+            throw new NotFoundException(String.format("Пользователь с ID %d не найден", id));
+        }
     }
 
     public User updateUser(User user) {
-        return userStorage.updateUser(user);
+        Optional<User> optUser = userStorage.updateUser(user);
+        if (optUser.isPresent()) {
+            return optUser.get();
+        } else {
+            throw new NotFoundException(String.format("Пользователь с ID %d не найден", user.getId()));
+        }
     }
 
     public List<User> getUserList() {
@@ -39,16 +49,25 @@ public class UserService {
     }
 
     public User addFriend(int id, int friendId) {
-        try {
-            if (isUserInStorage(id) && isUserInStorage(friendId)) {
-                userStorage.getUser(id).addFriends(friendId);
-                userStorage.getUser(friendId).addFriends(id);
+        Optional<User> user = userStorage.getUser(id);
+        Optional<User> friend = userStorage.getUser(friendId);
+        if (user.isPresent()) {
+            if (friend.isPresent()) {
+                user.get().addFriends(friendId);
+                if (friend.get().getFriends().containsKey(id)) {
+                    user.get().updateFriend(friendId, true);
+                    friend.get().updateFriend(id, true);
+                }
+
+                userStorage.updateUser(user.get());
+                userStorage.updateUser(friend.get());
+
+                return user.get();
+            } else {
+                throw new NotFoundException(String.format("Не нашли друга с ID %d", friendId));
             }
-            return userStorage.getUser(id);
-        } catch (ValidationException exception) {
-            throw new ValidationException(exception.getMessage());
-        } catch (NotFoundException exception) {
-            throw new NotFoundException(exception.getMessage());
+        } else {
+            throw new NotFoundException(String.format("Не нашли пользователя с ID %d", id));
         }
     }
 
@@ -56,9 +75,20 @@ public class UserService {
         try {
             if (isUserInStorage(id) && isUserInStorage(friendId)) {
                 log.info("Пользователь " + friendId + " удален из друзей пользователя " + id);
-                userStorage.getUser(id).removeFriends(friendId);
-                userStorage.getUser(friendId).removeFriends(id);
-                return userStorage.getUser(id);
+                Optional<User> user = userStorage.getUser(id);
+                if (user.isPresent()) {
+                    user.get().removeFriends(friendId);
+                    Optional<User> friend = userStorage.getUser(friendId);
+                    if (friend.isPresent()) {
+                        friend.get().removeFriends(id);
+                        userStorage.updateUser(user.get());
+                        userStorage.updateUser(friend.get());
+                        Optional<User> returningUser = userStorage.getUser(id);
+                        if (returningUser.isPresent()) {
+                            return returningUser.get();
+                        }
+                    }
+                }
             }
             throw new RuntimeException("Ошибка удаления из друзей");
         } catch (NotFoundException exception) {
@@ -67,21 +97,49 @@ public class UserService {
     }
 
     public List<User> getMutualFriends(int userId, int otherUserId) {
-        return userStorage.getUser(userId).getFriends().stream()
-                .filter(userStorage.getUser(otherUserId).getFriends()::contains)
-                .map(userStorage::getUser)
-                .collect(Collectors.toList());
+        Optional<User> user = userStorage.getUser(userId);
+        Optional<User> otherUser = userStorage.getUser(otherUserId);
+        if (user.isPresent() && otherUser.isPresent()) {
+            List<Optional<User>> optUsers = user.get().getFriends().keySet().stream()
+                    .filter(otherUser.get().getFriends().keySet()::contains)
+                    .map(userStorage::getUser).collect(Collectors.toList());
+            ArrayList<User> users = new ArrayList<>();
+            for (Optional<User> optionalUser : optUsers) {
+                if (optionalUser.isPresent()) {
+                    users.add(optionalUser.get());
+                } else {
+                    throw new NotFoundException();
+                }
+            }
+            return users;
+        } else {
+            throw new NotFoundException();
+        }
     }
 
     public List<User> getFriendList(int id) {
-        return userStorage.getUser(id).getFriends().stream()
-                .map(userStorage::getUser)
-                .sorted(Comparator.comparing(User::getId))
-                .collect(Collectors.toList());
+        if (userStorage.getUser(id).isPresent()) {
+            User user = userStorage.getUser(id).get();
+            List<Optional<User>> optUsers = user.getFriends().keySet().stream()
+                    .map(userStorage::getUser).collect(Collectors.toList());
+            ArrayList<User> users = new ArrayList<>();
+            for (Optional<User> optionalUser : optUsers) {
+                if (optionalUser.isPresent()) {
+                    users.add(optionalUser.get());
+                } else {
+                    throw new NotFoundException();
+                }
+            }
+            return users.stream()
+                    .sorted(Comparator.comparing(User::getId))
+                    .collect(Collectors.toList());
+        } else {
+            throw new NotFoundException();
+        }
     }
 
     private boolean isUserInStorage(int id) {
-        if (userStorage.getUser(id) == null) {
+        if (userStorage.getUser(id).isEmpty()) {
             log.warn(String.format("Ошибка: пользователь с %d не найден", id));
             throw new NotFoundException(String.format("Пользователь с id %d не найден", id));
         }

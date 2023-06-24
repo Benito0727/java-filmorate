@@ -1,5 +1,4 @@
-package ru.yandex.practicum.filmorate.Controllers;
-
+package ru.yandex.practicum.filmorate.controllers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class FilmControllerTest {
 
     private FilmController controller;
-
 
     private FilmService filmService;
     private static final TestUnits unit = new TestUnits();
